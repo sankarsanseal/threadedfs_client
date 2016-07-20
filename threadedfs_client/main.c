@@ -10,25 +10,44 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#define MAXSIZE 1024
+#define MAXLINE 80
+#define FILEPERM S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH|S_IRGRP
 
 int serverfifo;
 int clientfifo;
+int dummy;
 int server_pid;
-int client_pid;
+pid_t client_pid;
 int userid;
-char  path_to_server[1024];
-char  pwd[1024];
+char  path_to_server[MAXSIZE];
+char path_to_client[MAXSIZE];
+char  pwd[MAXSIZE];
+char buff[1024];
 
-typedef struct instruction
+//typedef struct instruction
+//{
+//    int instruct_code;
+//    int userid;
+//    char pwd[1024];
+//
+//};
+
+void printmsg()
 {
-    int instruct_code;
-    int userid;
-    char pwd[1024];
+    clientfifo=open(path_to_client,O_RDONLY);
+    //dummy=open(path_to_client,O_WRONLY);
     
-};
+    read(clientfifo,buff,MAXSIZE);
+    printf("%s",buff);
+    close(clientfifo);
+    
 
+}
 
 void setuserid()
 {
@@ -41,31 +60,124 @@ void setuserid()
 void printpwd()
 {
     int choice;
+    
+    
     printf("Present working directory of user id %d: %s\n",userid,pwd);
     printf("Want to see list?\n1.Yes\n2.No\n");
     scanf("%d",&choice);
     if(choice==1)
     {
-        int
-        write(serverfifo,
+        sprintf(buff,"%d %d %s %d",2,userid,pwd,client_pid);
+
+        
+        write(serverfifo,buff,MAXLINE);
+        printmsg();
     }
+
+    
 }
 
 void changedir()
 {
+    char buff[1024];
     char dirname[256];
     printf("Enter the directory name:");
-    scanf("%[^\n]s",dirname);
-    write(
+    scanf("%s",dirname);
+    
+    sprintf(buff,"%d %d %s/%s %d",3,userid,pwd,dirname,client_pid);
+    write(serverfifo,buff,MAXLINE);
+    
+    printmsg();
     
 }
 
 void makedir()
 {
     char dirname[256];
-    printf("Enter the name of new directory:");
+    printf("Enter the name of new directory to make:");
     scanf("%[^\n]s",dirname);
+    
+    sprintf(buff,"%d %d %s/%s %d",4,userid,pwd,dirname,client_pid);
+    write(serverfifo,buff,MAXLINE);
+    
+    printmsg();
+    
+
 }
+
+void removedir()
+{
+    char dirname[256];
+    printf("Enter the name of new directory to remove:");
+    scanf("%[^\n]s",dirname);
+    
+    sprintf(buff,"%d %d %s/%s %d",5,userid,pwd,dirname,client_pid);
+    write(serverfifo,buff,MAXLINE);
+    
+    printmsg();
+    
+    
+}
+
+void changeown()
+{
+    char dirname[256];
+    printf("Enter the name of file or directory to change ownership:");
+    scanf("%[^\n]s",dirname);
+    
+    sprintf(buff,"%d %d %s/%s %d",6,userid,pwd,dirname,client_pid);
+    write(serverfifo,buff,MAXLINE);
+    
+    printmsg();
+    
+    
+}
+
+void createfile()
+{
+    char dirname[256];
+    printf("Enter the name of file to create:");
+    scanf("%[^\n]s",dirname);
+    
+    sprintf(buff,"%d %d %s/%s %d",7,userid,pwd,dirname,client_pid);
+    write(serverfifo,buff,MAXLINE);
+    
+    printmsg();
+    
+    
+}
+
+void renamefd()
+{
+    char dirname[256];
+    printf("Enter the name of file of directory to rename:");
+    scanf("%[^\n]s",dirname);
+    
+    sprintf(buff,"%d %d %s/%s %d",9,userid,pwd,dirname,client_pid);
+    write(serverfifo,buff,MAXLINE);
+    
+    printmsg();
+    
+    
+}
+
+void deletefile()
+{
+    char dirname[256];
+    printf("Enter the name of file  to delete:");
+    scanf("%[^\n]s",dirname);
+    
+    sprintf(buff,"%d %d %s/%s %d",8,userid,pwd,dirname,client_pid);
+    write(serverfifo,buff,MAXLINE);
+    
+    printmsg();
+    
+    
+}
+
+
+
+
 
 
 
@@ -101,6 +213,21 @@ void menu()
             case 4:
                 makedir();
                 break;
+            case 5:
+                removedir();
+                break;
+            case 6:
+                changeown();
+                break;
+            case 7:
+                createfile();
+                break;
+            case 8:
+                renamefd();
+                break;
+            case 9:
+                deletefile();
+                break;
                 
             case 0:
                 printf("Exiting...\n");
@@ -123,10 +250,21 @@ int main(int argc, const char * argv[]) {
     {
         client_pid=getpid();
         server_pid=atoi(argv[1]);
-        sprintf(path_to_server,"/tmp/server.%d",server_pid);
+        sprintf(path_to_server,"/tmp/server");
         if(!access(path_to_server, F_OK))
         {
+            serverfifo=open(path_to_server,O_WRONLY);
+            
+            //write(serverfifo,"Okay Client 2 is speaking\n",MAXLINE);
+            
+            sprintf(path_to_client,"/tmp/client.%d",client_pid);
+            mkfifo(path_to_client, FILEPERM);
+            
+            
             menu();
+            close(serverfifo);
+            close(clientfifo);
+            unlink(path_to_client);
         }
         else
         {
