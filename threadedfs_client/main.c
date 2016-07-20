@@ -82,9 +82,10 @@ void changedir()
     char buff[1024];
     char dirname[256];
     printf("Enter the directory name:");
-    scanf("%s",dirname);
+    getchar();
+    scanf("%[^\n]s",dirname);
     
-    sprintf(buff,"%d %d %s/%s %d",3,userid,pwd,dirname,client_pid);
+    sprintf(buff,"%d %d \"%s/%s\" %d",3,userid,pwd,dirname,client_pid);
     write(serverfifo,buff,MAXLINE);
     
     printmsg();
