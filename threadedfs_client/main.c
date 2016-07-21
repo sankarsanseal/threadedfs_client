@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "struct_msg.h"
 #define MAXSIZE 1024
 #define MAXLINE 80
 #define FILEPERM S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH|S_IRGRP
@@ -37,17 +38,61 @@ char buff[1024];
 //
 //};
 
+MSGP allot_msg()
+{
+    MSGP temp;
+    
+    if((temp=(MSGP)malloc(sizeof (MSG)))!=NULL)
+        return temp;
+    else
+        return NULL;
+    
+}
+
+
+
+SMSGP allot_smsg()
+{
+    SMSGP temp;
+    
+    if((temp=(SMSGP)malloc(sizeof (SMSG)))!=NULL)
+        return temp;
+    else
+        return NULL;
+    
+}
+
 void printmsg()
 {
+    SMSGP temp;
+    
+    temp=allot_smsg();
+    
+    if(temp!=NULL)
+    {
+    
     clientfifo=open(path_to_client,O_RDONLY);
     //dummy=open(path_to_client,O_WRONLY);
     
-    read(clientfifo,buff,MAXSIZE);
-    printf("%s",buff);
-    close(clientfifo);
+        //do
+        //{
+            
+            read(clientfifo,temp,sizeof(temp)); 
+            printf("Message ID:%d Is More :%d %s\n",temp->msg_id, temp->more,temp->msg_body);
+            close(clientfifo);
+        //}
+        //while(temp->more);
+        
+        free(temp);
+        
+    }
+    else
+        printf("Problem with printmsg\n");
     
 
 }
+
+
 
 void setuserid()
 {
@@ -61,17 +106,29 @@ void printpwd()
 {
     int choice;
     
+    MSGP temp;
+    
     
     printf("Present working directory of user id %d: %s\n",userid,pwd);
     printf("Want to see list?\n1.Yes\n2.No\n");
     scanf("%d",&choice);
     if(choice==1)
     {
-        sprintf(buff,"%d %d %s %d",2,userid,pwd,client_pid);
+        temp=allot_msg();
+        if(temp!=NULL)
+        {
+            temp->instruct_code=2;
+            temp->userid=userid;
+            strcpy(temp->pwd,pwd);
+            temp->client_pid=client_pid;
 
         
-        write(serverfifo,buff,MAXLINE);
-        printmsg();
+            write(serverfifo,temp,sizeof(MSG));
+            free(temp);
+            printmsg();
+        }
+        else
+            printf("instruction can not be sent\n");
     }
 
     

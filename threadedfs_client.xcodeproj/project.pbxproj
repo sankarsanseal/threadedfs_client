@@ -23,6 +23,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6A24205D1D407552006B6121 /* struct_msg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = struct_msg.h; sourceTree = "<group>"; };
 		6A4AFAB51D3F424E00536109 /* threadedfs_client */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = threadedfs_client; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A4AFAB81D3F424E00536109 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				6A4AFAB81D3F424E00536109 /* main.c */,
+				6A24205D1D407552006B6121 /* struct_msg.h */,
 			);
 			path = threadedfs_client;
 			sourceTree = "<group>";
@@ -239,6 +241,7 @@
 				6A4AFABE1D3F424E00536109 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
