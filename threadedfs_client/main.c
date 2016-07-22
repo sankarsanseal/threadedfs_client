@@ -74,14 +74,15 @@ void printmsg()
     clientfifo=open(path_to_client,O_RDONLY);
     //dummy=open(path_to_client,O_WRONLY);
     
-        //do
-        //{
+        do
+        {
             
             read(clientfifo,temp,sizeof(temp)); 
             printf("Message ID:%d Is More :%d %s\n",temp->msg_id, temp->more,temp->msg_body);
+            
             close(clientfifo);
-        //}
-        //while(temp->more);
+        }
+        while(temp->more);
         
         free(temp);
         
@@ -205,7 +206,7 @@ void createfile()
     
 }
 
-void renamefd()
+void rename_copy_fd()
 {
     char dirname[256];
     printf("Enter the name of file of directory to rename:");
@@ -281,7 +282,7 @@ void menu()
                 createfile();
                 break;
             case 8:
-                renamefd();
+                rename_copy_fd();
                 break;
             case 9:
                 deletefile();
